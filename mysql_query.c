@@ -74,7 +74,31 @@ int main(int argc, char **argv)
 		{
 			finish_with_error(conn);
 		}
+
+		if(mysql_query(conn, "select * from sensor"))
+		{
+			finish_with_error(conn);
+		}
+
+		MYSQL_RES *res = mysql_store_result(conn);
+		if(!res)
+		{
+			finish_with_error(conn);
+		}
+
+		int num_fields = mysql_num_fields(res);
+
+		while(row = mysql_fetch_row(res))
+		{
+			for(int i = 0; i < num_fields; i++)
+			{
+				printf("%s  ", row[i] ?row[i] : "NULL");
+			}
+			printf("\n");
+		}
  
         mysql_free_result(result);
         mysql_close(conn);
+
+		return 0;
 }
