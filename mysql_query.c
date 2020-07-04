@@ -19,6 +19,7 @@ int main(int argc, char **argv)
  
         conn = mysql_init(NULL);
  
+		printf("Before Connect\n");
         if(!mysql_real_connect(
 			conn, "localhost", "bitai", "456123", NULL, 0, NULL, 0))
 		{
@@ -34,24 +35,27 @@ int main(int argc, char **argv)
                 }
         }
 
+		printf("After Connect\n");
 		if(mysql_query(conn, "drop table if exists sensor"))
 		{
 			finish_with_error(conn);
 		}
 
+		printf("After Conditional Drop Table\n");
 		if(mysql_query(conn, "create table sensor(" \
-			"no integer unsigned not null auto_increment primary key," \
+			"no int unsigned not null auto_increment primary key," \
 			"acc_x float not null," \
 			"acc_y float not null," \
 			"acc_z float not null," \
 			"ang_x float not null," \
 			"ang_y float not null," \
 			"ang_z float not null," \
-			"reg_date timestamp not null default now()"))
+			"reg_date timestamp not null default now())"))
 		{
 			finish_with_error(conn);
 		}
  
+		printf("After Create Table\n");
         sprintf(query_buffer, "%s", "show tables");
         if (mysql_query(conn, query_buffer))
 		{
@@ -59,11 +63,14 @@ int main(int argc, char **argv)
                 exit(1);
         }
  
+		printf("After Show Tables\n");
         result = mysql_use_result(conn);
         while ((row = mysql_fetch_row(result)) != NULL)
                 printf("%s \n", row[0]);
 
-		if(mysql_query(conn, "insert into sensor values(0.3, 0.2, 0.1, 0.1, 0.2, 0.3)"))
+		if(mysql_query(conn, "insert into sensor " \
+				"(acc_x, acc_y, acc_z, ang_x, ang_y, ang_z) " \
+				"values(0.3, 0.2, 0.1, 0.1, 0.2, 0.3)"))
 		{
 			finish_with_error(conn);
 		}
