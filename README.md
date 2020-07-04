@@ -17,4 +17,4 @@ mysql> flush privileges;
 mysql> exit  
 
 # How to compile MySQL Associated Code
-gcc mysql_query.c `mysql_config --cflags --libs` -std=c99  
+gcc mysql_query.c \`mysql_config --cflags --libs\` -std=c99  
