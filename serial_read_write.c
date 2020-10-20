@@ -5,6 +5,9 @@
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
+#include <pthread.h>
+
+pthread_mutex_t mtx;
 
 int set_interface_attribs(int fd, int speed)
 {
@@ -57,12 +60,49 @@ void set_mincount(int fd, int mcount)
         printf("Error tcsetattr: %s\n", strerror(errno));
 }
 
+void *serial_read(void *fd)
+{
+	int serial_fd = *((int *)fd);
+	char buf[128] = "";
+
+	for(;;)
+    {
+		read(serial_fd, buf, sizeof(buf));
+		printf("Serial Read = %s\n", buf);
+		memset(buf, 0x0, 128);
+
+		usleep(5000);
+	}
+}
+
+void *serial_write(void *fd)
+{
+	int serial_fd = *((int *)fd);
+	char buf[128] = "";
+
+	for(;;)
+    {
+        pthread_mutex_lock(&mtx);
+
+		read(0, buf, sizeof(buf));
+		write(serial_fd, buf, strlen(buf));
+		printf("Serial Write: %s\n", buf);
+		memset(buf, 0x0, 128);
+
+		pthread_mutex_unlock(&mtx);
+
+		usleep(5000);
+	}
+}
 
 int main()
 {
     char *portname = "/dev/ttyACM0";
     int fd;
     int wlen;
+
+	pthread_t p_thread[2];
+    int thread_id, status;
 
     fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
     if (fd < 0) {
@@ -74,6 +114,26 @@ int main()
     set_interface_attribs(fd, B9600);
     //set_mincount(fd, 0);                /* set to pure timed read */
 
+	pthread_mutex_init(&mtx, NULL);
+
+	thread_id = pthread_create(&p_thread[0], NULL, serial_write, (void *)&fd);
+    if(thread_id < 0)
+    {
+        perror("network recv thread create error: ");
+        exit(0);
+    }
+
+    thread_id = pthread_create(&p_thread[1], NULL, serial_read, (void *)&fd);
+    if(thread_id < 0)
+    {
+        perror("command proc thread create error: ");
+        exit(0);
+    }
+
+	pthread_join(p_thread[0], (void **)&status);
+    pthread_join(p_thread[1], (void **)&status);
+
+#if 0
     /* simple output */
     wlen = write(fd, "Hello!\n", 7);
     if (wlen != 7) {
@@ -106,4 +166,7 @@ int main()
         }               
         /* repeat read to get full message */
     } while (1);
+#endif
+
+	return 0;
 }
