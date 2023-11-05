@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <mysql.h>
 
+#define USER_ID			"eddi"
+#define USER_PW			"eddi@123"
+
 void finish_with_error(MYSQL *conn)
 {
 	fprintf(stderr, "%s\n", mysql_error(conn));
@@ -21,17 +24,21 @@ int main(int argc, char **argv)
  
 		printf("Before Connect\n");
         if(!mysql_real_connect(
-			conn, "localhost", "bitai", "456123", NULL, 0, NULL, 0))
+			conn, "localhost", USER_ID, USER_PW, NULL, 0, NULL, 0))
 		{
-                printf("cannot connect");
+                printf("cannot connect\n");
                 exit(1);
         }
         else
 		{
                 if (mysql_select_db(conn, "cdb"))
 				{
-                        printf("cannot use databases");
-                        exit(1);
+                        printf("cannot use databases\n");
+						if(mysql_query(conn, "create database cdb"))
+						{
+								finish_with_error(conn);
+						}
+						mysql_select_db(conn, "cdb");
                 }
         }
 

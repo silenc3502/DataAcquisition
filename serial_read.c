@@ -64,6 +64,8 @@ int main()
     int fd;
     int wlen;
 
+	printf("GoGoGo\n");
+
     fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
     if (fd < 0) {
         printf("Error opening %s: %s\n", portname, strerror(errno));
@@ -81,6 +83,7 @@ int main()
     }
     tcdrain(fd);    /* delay for output */
 
+	printf("GoGoGo\n");
 
     /* simple noncanonical input */
     do {

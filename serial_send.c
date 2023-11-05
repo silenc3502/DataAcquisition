@@ -93,7 +93,7 @@ int main(int argc, char **argv)
 	printf("Serial Test Start... (%s)\n", __DATE__);
 
 	strcpy(dev_name, argv[1]);
-	baud = stroul(argv[2], NULL, 10);
+	baud = strtoul(argv[2], NULL, 10);
 
 	fd = open_serial(dev_name, baud, 10, 32);
 
